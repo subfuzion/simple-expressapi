@@ -3,7 +3,10 @@ var app = require('express')(),
     debug = require('debug')('app'),
     morgan = require('morgan'),
     path = require('path'),
+    util = require('util'),
     pkg = require('./package.json');
+
+var salutation = 'Hello';
 
 module.exports = app;
 
@@ -20,19 +23,31 @@ app.get('/', function(req, res) {
 });
 
 app.get('/greeting', function(req, res) {
-  res.json({ greeting: 'Hello World!' });
+  res.json({ success: true, greeting: util.format('%s World', salutation) });
+});
+
+app.post('/greeting', function(req, res) {
+  var newSalutation = req.body.salutation;
+
+  if (!newSalutation) {
+    return res.status(400).json({ success: false, reason: 'body is missing salutation parameter' });
+  }
+
+  salutation = newSalutation;
+  return res.json({ success: true, salutation: salutation });
+
 });
 
 app.get('/greeting/:name', function(req, res) {
   var name = req.params.name;
-  res.json({ greeting: 'Hello ' + name + '!' });
+  res.json({ success: true, greeting: util.format('%s %s', salutation, name) });
 });
 
 app.post('/greeting/:name', function(req, res) {
   var name = req.params.name,
       body = req.body;
 
-  res.json({ greeting: 'Hello ' + name + '!', message: body.message });
+  res.json({ success: true, greeting: util.format('%s %s', salutation, name), message: body.message });
 });
 
 

@@ -5,7 +5,7 @@ var app = require('../app'),
     port = process.env.PORT || 3000;
     baseUrl = 'http://localhost:' + port;
 
-describe('/ route tests', function() {
+describe('/ route integration tests', function() {
   before(function (done) {
     app.set('port', port);
     var server = app.listen(app.get('port'), function () {
@@ -37,7 +37,7 @@ describe('/ route tests', function() {
   });
 });
 
-describe('/greeting route tests', function() {
+describe('/greeting route integration tests', function() {
   before(function (done) {
     app.set('port', port);
     var server = app.listen(app.get('port'), function () {
@@ -62,7 +62,7 @@ describe('/greeting route tests', function() {
         .get('/greeting')
         .expectStatus(200)
         .expectHeader('Content-Type', 'application/json; charset=utf-8')
-        .expectBody({greeting: 'Hello World!'})
+        .expectBody({success: true, greeting: 'Hello World'})
         .end(function (err, res, body) {
           done(err);
         });
@@ -75,13 +75,13 @@ describe('/greeting route tests', function() {
         .get('/greeting/nodester')
         .expectStatus(200)
         .expectHeader('Content-Type', 'application/json; charset=utf-8')
-        .expectBody({greeting: 'Hello nodester!'})
+        .expectBody({success: true, greeting: 'Hello nodester'})
         .end(function (err, res, body) {
           done(err);
         });
   });
 
-  it('should POST a message to /greeting/:name', function (done) {
+  it('should POST a custom message to /greeting/:name', function (done) {
     api()
         .json()
         .base(baseUrl)
@@ -89,7 +89,7 @@ describe('/greeting route tests', function() {
         .send({message: 'test message'})
         .expectStatus(200)
         .expectHeader('Content-Type', 'application/json; charset=utf-8')
-        .expectBody({greeting: 'Hello nodester!', message: 'test message'})
+        .expectBody({ success: true, greeting: 'Hello nodester', message: 'test message' })
         .end(function (err, res, body) {
           done(err);
         });
@@ -97,3 +97,34 @@ describe('/greeting route tests', function() {
 
 });
 
+describe('/greeting route custom salutation unit tests', function() {
+
+  it('should POST a custom salutation to /greeting', function (done) {
+    api()
+        .json()
+        .base(baseUrl)
+        .post('/greeting')
+        .send({ salutation: 'Hola' })
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(200, { success: true, salutation: 'Hola' }, done);
+  });
+
+  it('should GET /greeting with custom salutation', function (done) {
+    api()
+        .json()
+        .base(baseUrl)
+        .get('/greeting')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(200, {success: true, greeting: 'Hola World'}, done);
+  });
+
+  it('should GET /greeting/:name with custom salutation', function (done) {
+    api()
+        .json()
+        .base(baseUrl)
+        .get('/greeting/mundo')
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .expect(200, {success: true, greeting: 'Hola mundo'}, done);
+  });
+
+});
